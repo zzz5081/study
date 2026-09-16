@@ -2,3 +2,9 @@
 __pycache__/
 *.pyc
 venv/
+
+# 含数据库密码的本地脚本/配置，不要上传 GitHub
+sqlalchemy_demo.py
+.env
+db_config.py
+*_secret.py

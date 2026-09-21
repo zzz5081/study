@@ -16,3 +16,11 @@ class Solution:
             else:
                 right = mid - 1
         return left if left*left <= x else left-1
+
+if __name__ == "__main__":
+    s = Solution()
+    assert s.mySqrt(25) == 5
+    assert s.mySqrt(0) == 0
+    assert s.mySqrt(15) == 3
+    assert s.mySqrt(101) == 10
+    print("测试通过")

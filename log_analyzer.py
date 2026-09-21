@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+import json
 from collections import Counter,defaultdict
 
 class LogAnalyzer:
@@ -38,9 +39,20 @@ class LogAnalyzer:
     def summary(self):
         return dict(self.levels)
 
-    def top_errors(self,n = 3):
+    def __str__(self):
+        return f"LogAnalyzer({self.path},有效{sum(self.levels.values())}行)"
+
+    def top_errors(self, n=3):
         x = Counter(self.errors)
         return x.most_common(n)
+
+    @property
+    def error_count(self):
+        return len(self.errors)
+
+class JsonLogAnalyzer(LogAnalyzer):
+    def report(self):
+        print(json.dumps(self.summary(),ensure_ascii=False,indent=2))
 
 if __name__ == "__main__":
     a = LogAnalyzer("test.log")
@@ -48,3 +60,9 @@ if __name__ == "__main__":
     a.report()
     print(a.summary())
     print(a.top_errors())
+    print(a)
+    print("errors的行数为:",a.error_count)
+    j = JsonLogAnalyzer("test.log")
+    j.parse()
+    j.report()
+    print(j.summary())

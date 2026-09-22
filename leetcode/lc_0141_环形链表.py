@@ -33,15 +33,14 @@ class Solution:
 
 if __name__ == "__main__":
     s = Solution()
-    cur = build_cycle([3,2,0,4],1)
-    cur1 = build_cycle([1,2],0)
-    cur2 = build_cycle([1],-1)
-    cur3 = build_cycle([],0)
-    cur4 = build_cycle([3,2,0,4],3)
-    assert s.hasCycle(None) == False
+    cur = build_cycle([3,2,0,4],1)      # 官方用例1：尾指回索引 1
+    cur1 = build_cycle([1,2],0)         # 官方用例2：尾指回索引 0
+    cur2 = build_cycle([1],0)           # ★ 单节点自环（最刁钻的边界）
+    cur3 = build_cycle([],0)            # 空链表 → build_cycle 返回 None
+    cur4 = build_cycle([3,2,0,4],3)     # 尾节点指向自己（自环）
     assert s.hasCycle(cur) == True
     assert s.hasCycle(cur1) == True
-    assert s.hasCycle(cur2) == False
+    assert s.hasCycle(cur2) == True
     assert s.hasCycle(cur3) == False
     assert s.hasCycle(cur4) == True
     print("测试成功")

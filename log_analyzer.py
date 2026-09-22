@@ -2,6 +2,7 @@ from pathlib import Path
 import re
 import json
 from collections import Counter,defaultdict
+import argparse
 
 class LogAnalyzer:
     def __init__(self,path):
@@ -55,14 +56,25 @@ class JsonLogAnalyzer(LogAnalyzer):
         print(json.dumps(self.summary(),ensure_ascii=False,indent=2))
 
 if __name__ == "__main__":
-    a = LogAnalyzer("test.log")
-    a.parse()
-    a.report()
-    print(a.summary())
-    print(a.top_errors())
-    print(a)
-    print("errors的行数为:",a.error_count)
-    j = JsonLogAnalyzer("test.log")
-    j.parse()
-    j.report()
-    print(j.summary())
+    # a = LogAnalyzer("test.log")
+    # a.parse()
+    # a.report()
+    # print(a.summary())
+    # print(a.top_errors())
+    # print(a)
+    # print("errors的行数为:",a.error_count)
+    # j = JsonLogAnalyzer("test.log")
+    # j.parse()
+    # j.report()
+    # print("summary:",j.summary())
+    parser = argparse.ArgumentParser(description = "日志分析工具")
+    parser.add_argument("path",help = "日志文件路径")
+    parser.add_argument("--level",choices = ["INFO","ERROR","WARNING"],default = "INFO",help = "只统计某个级别(默认 INFO)")
+    parser.add_argument("-n",type = int,default = 3,help = "显示错误 TOP N(默认3)")
+    args = parser.parse_args()
+
+    a1 = LogAnalyzer(args.path)
+    a1.parse()
+    a1.report()
+    print(f"错误 Top {args.n}:",a1.top_errors(args.n))
+    print(f"{args.level} 级别:{a1.summary()[args.level]}条")

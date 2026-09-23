@@ -3,7 +3,24 @@ import re
 import json
 from collections import Counter,defaultdict
 import argparse
+import logging
 
+logger = logging.getLogger(__name__)
+
+def setup_logging():
+    logger.setLevel(logging.DEBUG)
+
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+
+    file_handler = logging.FileHandler("log_analyzer.log",encoding = "utf-8")
+    file_handler.setLevel(logging.DEBUG)
+
+    fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+    console.setFormatter(fmt)
+    file_handler.setFormatter(fmt)
+    logger.addHandler(console)
+    logger.addHandler(file_handler)
 class LogAnalyzer:
     def __init__(self,path):
         self.path = path
@@ -15,19 +32,21 @@ class LogAnalyzer:
         try:
             lines = Path(self.path).read_text(encoding = 'utf-8').splitlines()
         except FileNotFoundError:
-            print("没有找到该项目")
+            logger.error("没有找到该项目")
             return
         pattern = r"^(\d{4}-\d{2}-\d{2})\s(\d{2}):(\d{2}):(\d{2})\s(INFO|ERROR|WARNING)\s(.+)$"
         for line in lines:
             m = re.match(pattern,line)
             if m is None:
                 self.skipped.append(line)
+                logger.debug(f"跳过脏行:{line}")
                 continue
             date,hh,mm,ss,level,msg = m.groups()
             self.levels[level] += 1
             self.hours[hh] += 1
             if level == "ERROR":
                 self.errors.append(msg)
+        logger.info(f"解析完成: 有效{sum(self.levels.values())}行,跳过{len(self.skipped)}行")
     def report(self):
         print("级别:",dict(self.levels))
         print("按小时:",dict(self.hours))
@@ -56,6 +75,7 @@ class JsonLogAnalyzer(LogAnalyzer):
         print(json.dumps(self.summary(),ensure_ascii=False,indent=2))
 
 if __name__ == "__main__":
+    setup_logging()
     # a = LogAnalyzer("test.log")
     # a.parse()
     # a.report()
@@ -77,4 +97,4 @@ if __name__ == "__main__":
     a1.parse()
     a1.report()
     print(f"错误 Top {args.n}:",a1.top_errors(args.n))
-    print(f"{args.level} 级别:{a1.summary()[args.level]}条")
+    print(f"{args.level} 级别:{a1.summary().get(args.level,0)}条")

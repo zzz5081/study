@@ -4,8 +4,10 @@ __pycache__/
 venv/
 
 # 程序自己生成的日志文件（不是数据，不该进仓库）
-# ⚠️ 只忽略这一个 —— 不要写 *.log，因为 test.log 是要留在仓库里的测试数据
+# ⚠️ 只逐个列出 —— 不要写 *.log，因为 test.log 是要留在仓库里的测试数据
 log_analyzer.log
+logging_practice.log
+diagnose.log
 
 # 含数据库密码的本地脚本/配置，不要上传 GitHub
 sqlalchemy_demo.py

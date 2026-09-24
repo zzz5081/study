@@ -34,8 +34,20 @@ import logging
 # ═══════════════════════════════════════════════════════════
 # ↓↓↓ 在这里写配置（写 6 步）↓↓↓
 # ═══════════════════════════════════════════════════════════
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+file_handler = logging.FileHandler('logging_practice.log')
+file_handler.setLevel(logging.DEBUG)
 
+fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+console.setFormatter(fmt)
+file_handler.setFormatter(fmt)
+
+logger.addHandler(console)
+logger.addHandler(file_handler)
 
 # ═══════════════════════════════════════════════════════════
 # ↑↑↑ 写到这里（上面必须定义出一个叫 logger 的变量）↑↑↑

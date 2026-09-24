@@ -22,7 +22,7 @@ logger.setLevel(logging.DEBUG)
 
 h = logging.FileHandler("diagnose.log", encoding="utf-8")
 h.setLevel(logging.DEBUG)
-
+logger.addHandler(h)
 logger.debug("hello")
 
 
@@ -31,28 +31,28 @@ logger.debug("hello")
 # ═══════════════════════════════════════════════════════════
 #
 # 【问题1】缺了哪一行代码？（把那一行写出来）
-#
+logger.addHandler(h)
 #
 # 【问题2】为什么缺了它，日志就完全不出来？
 #          （提示：想想 logger 和 handler 之间的关系）
-#
+#因为没了它就相当于水没接上水龙头，出不来东西，没有连接上
 #
 # 【问题3】这两个问题的答案，和下面哪个比喻对应？
 #              ① 造了水龙头，但没把水管接上
 #              ② 造了水龙头，但水压不够
 #              ③ 水管接上了，但没开水
 #
-#           答案：____
+#           答案：__1
 #
 # 【问题4】跑一遍代码后回答：
 #          diagnose.log 这个文件被创建了吗？大小是多少字节？为什么？
-#
+#   被创建了，但是大小为0字节，因为没连上logger
 #
 # ═══════════════════════════════════════════════════════════
 # 填完之后，把上面的注释取消掉，跑一次验证
 # ═══════════════════════════════════════════════════════════
-# print("logger.handlers =", logger.handlers)
-# print("加上缺的那一行之后再跑一次，看有什么变化")
+print("logger.handlers =", logger.handlers)
+print("加上缺的那一行之后再跑一次，看有什么变化")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -66,3 +66,4 @@ logger.debug("hello")
 #
 # 提示：root logger 在"没有任何 handler"时，会用一个内部的兜底 handler。
 #       查一下它的级别是多少。
+# 因为没有handler，就自动设置级别为warning，warning的级别大于info，不输出

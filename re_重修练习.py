@@ -38,5 +38,5 @@ print(f"实际:{re.fullmatch(pat,strings[2])}")#   fullmatch("abcxx")   → None
 #不知道fullmatch怎么用，之前是findall吗
 
 n = re.search("(?P<phone>1[3-9]\d{9})","我的电话是13812345678")
-n.group("phone")
+# n.group("phone")
 print(n.groupdict())

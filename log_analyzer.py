@@ -32,7 +32,7 @@ class LogAnalyzer:
         try:
             lines = Path(self.path).read_text(encoding = 'utf-8').splitlines()
         except FileNotFoundError:
-            logger.error("没有找到该项目")
+            logger.error(f"没有找到该项目,{self.path}")
             return
         pattern = r"^(\d{4}-\d{2}-\d{2})\s(\d{2}):(\d{2}):(\d{2})\s(INFO|ERROR|WARNING)\s(.+)$"
         for line in lines:

@@ -60,20 +60,33 @@ print()
 print("=" * 60)
 print("第 2 轮：默写（把下面的答案遮住/折叠）")
 print("=" * 60)
+# ① 导入 Path
+#     ② 构造 + 用 / 拼路径       → 指向 logs 目录下的 a.log
+#     ③ 读文件（记得 encoding）
+#     ④ 写文件
+#     ⑤ 找文件：glob（当前层）和 rglob（递归）
+#     ⑥ 三个路径属性：.name / .suffix / .stem
+#     ⑦ 补充：文件大小 .stat().st_size
+
 
 # ①
-
+from pathlib import Path
 # ②
-
+p = Path("logs") / "a.log"
 # ③
-
+Path('a.log').read_text(encoding="utf-8")
 # ④
-
+Path('a.log').write_text('something',encoding="utf-8")
 # ⑤
-
+Path('.').glob('*.log')
+Path('.').rglob('*.log')
 # ⑥
-
+p = Path('something/anything/2026-09.log')
+p.name
+p.stem
+p.suffix
 # ⑦
+Path('a.log').stat().st_size
 
 
 print()
@@ -81,20 +94,36 @@ print("=" * 60)
 print("第 3 轮：再默写一遍（不用了，直接看下面核对）")
 print("=" * 60)
 
+
+
+
+
+# ① 导入 Path
+#     ② 构造 + 用 / 拼路径       → 指向 logs 目录下的 a.log
+#     ③ 读文件（记得 encoding）
+#     ④ 写文件
+#     ⑤ 找文件：glob（当前层）和 rglob（递归）
+#     ⑥ 三个路径属性：.name / .suffix / .stem
+#     ⑦ 补充：文件大小 .stat().st_size
+
 # ①
-
+from pathlib import Path
 # ②
-
+Path('logs') / 'a.log'
 # ③
-
+Path('a.log').read_text(encoding='utf-8')
 # ④
-
+Path('a.log').write_text('something',encoding='utf-8')
 # ⑤
-
+Path('.').glob('*.log')
+Path('.').rglob('*.log') #=Path('.').glob('**/*.log')
 # ⑥
-
+p = Path('2026-09.log')
+print(p.name)
+print(p.stem)
+print(p.suffix)
 # ⑦
-
+Path('a.log').stat().st_size
 
 # ══════════════════════════════════════════════════════════════
 #

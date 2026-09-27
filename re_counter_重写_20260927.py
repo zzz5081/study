@@ -1,15 +1,17 @@
 target = "张三 13812345678 入职 2024-03-15"
 import re
-m = re.search('r(?P<name>\w+)\s(?P<telephone>\d{11})\s\w{2}\s(?P<time>\d{4}-\d{2}-\d{2})',target)
-print(m.group('telephone'),m.group('time'))
+m = re.search(r'(?P<name>\w+)\s(?P<telephone>\d{11})\s入职\s(?P<time>\d{4}-\d{2}-\d{2})',target)
+if m:
+    print(m.group('telephone'),m.group('time'))
+    print(m.groupdict())
 #match锁开头不锁结尾
 #search不锁
 #fullmatch锁开头和结尾
 
 
 from collections import Counter,defaultdict
-cc = Counter(split("我是谁,我在哪,我做了什么,我不知道"))
-print(cc.most_common(3),sum())
+cc = Counter("我是谁,我在哪,我做了什么,我不知道,我做了什么".split(','))
+print(cc.most_common(3),cc.total())
 dd = defaultdict(list)
 l = [('张三','北京'),('李四','上海'),('王五','北京')]
 for name,city in l:

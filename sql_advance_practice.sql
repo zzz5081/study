@@ -110,7 +110,6 @@ UPDATE accounts SET balance = balance - 300 WHERE id = 1;
 UPDATE accounts SET balance = balance + 300 WHERE id = 2;
 COMMIT;                          -- 永久生效
 SELECT * FROM accounts;          -- 700 / 1300
-w
 -- 查看当前隔离级别（MySQL 8 默认 REPEATABLE-READ）
 SELECT @@transaction_isolation;
 set SESSION transaction ISOLATION level read committed;

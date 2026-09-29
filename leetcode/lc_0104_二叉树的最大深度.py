@@ -18,7 +18,7 @@ class Solution:
 if __name__ == "__main__":
     s = Solution()
     assert s.maxDepth(None) == 0  # 空树 ← 递归边界，最容易漏
-
+    assert s.maxDepth(TreeNode(1)) == 1
     # 平衡树
     assert s.maxDepth(TreeNode(1, TreeNode(2), TreeNode(3))) == 2
 

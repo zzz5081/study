@@ -24,7 +24,6 @@ with Session(engine) as session:
     session.commit()
 
 with Session(engine) as session:
-    u = session.get(User,11)
     stmt = select(User).where(User.age >= 22)
     for u in session.scalars(stmt):
         print(u.name)

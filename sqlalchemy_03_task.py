@@ -25,6 +25,7 @@ def add_and_list(engine,names):
             u = User(name= i,age =20,email=i+ "@test.com")
             objs.append(u)
         session.add_all(objs)
+        session.flush()
         for u in objs:
             print(u.id,u.name,u.age,u.email)
         session.commit()

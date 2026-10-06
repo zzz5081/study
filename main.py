@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from fastapi import HTTPException
 
 app = FastAPI()
 
@@ -23,3 +24,11 @@ def list_users(skip: int = 5,limit: int = 10):
 @app.post("/users")
 def create_user(user: UserCreate):
     return {"收到":user,"名字": user.name}
+
+FAKE_DB = {1: {"id":1, "name":"张三"}, 2: {"id": 2, "name":"李四"}}
+
+@app.get("/items/{item_id}")
+def get_item(item_id: int):
+    if item_id not in FAKE_DB:
+        raise HTTPException(status_code=404, detail="这个 item 不存在")
+    return  FAKE_DB[item_id]

@@ -24,7 +24,7 @@ class Solution:
                     q.append(node.right)
             res.append(level)
         return res
-    
+
 if __name__ == "__main__":
     s = Solution()
     assert s.levelOrder(None) == []

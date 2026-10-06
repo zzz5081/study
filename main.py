@@ -18,7 +18,7 @@ def about():
 def get_user(user_id: str):
     return {"user_id": user_id, "类型": type(user_id).__name__}
 @app.get("/users")
-def list_users(skip: int,limit: int = 10):
+def list_users(skip: int = 5,limit: int = 10):
     return {"skip": skip,"limit": limit}
 @app.post("/users")
 def create_user(user: UserCreate):

@@ -4,7 +4,7 @@ app = FastAPI()
 USERS={}
 
 def get_current_user(token: str = Header(default="")):
-    if token is None:
+    if not token:
         raise HTTPException(401,"token 不存在")
     user = USERS.get(token)
     if user is None:

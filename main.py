@@ -27,8 +27,25 @@ def create_user(user: UserCreate):
 
 FAKE_DB = {1: {"id":1, "name":"张三"}, 2: {"id": 2, "name":"李四"}}
 
-@app.get("/items/{item_id}")
+@app.get("/items/{item_id}",
+         responses={
+             404: {"description" : "item 不存在"},
+             403: {"description" : "无权访问这个 item"},
+         },
+)
 def get_item(item_id: int):
     if item_id not in FAKE_DB:
         raise HTTPException(status_code=404, detail="这个 item 不存在")
     return  FAKE_DB[item_id]
+
+class UserOut(BaseModel):
+    id: int
+    name: str
+
+@app.get("/safe-users/{user_id}", response_model=UserOut)
+def get_user_safe(user_id: int):
+    row = FAKE_DB.get(user_id)
+    if row is None:
+        raise HTTPException(status_code=404,detail="用户不存在")
+    row = {**row,"password":"超级哈希机密"}
+    return row

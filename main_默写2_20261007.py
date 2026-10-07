@@ -1,0 +1,23 @@
+from fastapi import FastAPI,HTTPException,Depends,Header
+
+USERS = {
+
+}
+
+app = FastAPI()
+
+def get_current_user(token: str = Header(default='')):
+    if not token:
+        raise HTTPException(401,"token 不存在")
+    user = USERS.get(token)
+    if user is None:
+        raise HTTPException(401,"token 失效")
+    return user
+
+@app.get('/user')
+def user(user=Depends(get_current_user)):
+    return user['name']
+
+@app.get('/user-order')
+def user_order(user=Depends(get_current_user)):
+    return {'name': user['name'],"订单"["货物1","货物2"]}

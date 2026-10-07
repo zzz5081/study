@@ -244,16 +244,30 @@ W5（10/5–10/11）= FastAPI 入门周
 
 ## 九、待办 / 下一步
 
+### ⚠️ 更正（2026-10-07 11:55 实测）
+**下面这 3 条"遗留"其实【10/7 就已修完并提交】（commit `b6e6ef9`），别再让学生重做：**
+
+| 曾记的遗留 | 实测 | 证据 |
+|---|---|---|
+| `if token is None:` → `if not token:` | ✅ 已是 `if not token:` | `main_默写3_20261007.py:7` |
+| `/safe-users` 死参数改对 | ✅ 已是 `FAKE_DB.get(user_id)` | `main.py:47` |
+| `/items` 的 `responses` 声明 | ✅ 已声明 404+403 | `main.py:30-35` |
+
+实测（`TestClient`）：`safe-users/1→200{'id','name'}`（password 被 `response_model` 挡住）、
+`safe-users/99→404`、`items/99→404`。
+openapi 声明：`/items` = `[200,404,403,422]` ✅ / `/safe-users` = `[200,422]` ⬅ **唯一真缺口**
+
+> 📌 **教训（AI 记）**：写前瞻清单时要**跑一遍再写**。这次差点让学生重做已完成的活。
+
 ### 立即（10/8 上课第一天）
-- [ ] 🧮 **每日 1 题**（连续性最重要）
-- [ ] 改 `main_默写3_20261007.py` 里 `if token is None:` → **`if not token:`**
-      （`Header(default="")` 给的是**空字符串**不是 None，所以那个检查永不触发）
-- [ ] FastAPI 落地：把学的东西写进 `main.py`
-      （`/safe-users` 死参数改对 + `/items` 的 `responses` 声明）
+- [ ] 🧮 **每日 1 题**：103 锯齿形层序遍历（102 BFS 模板第 3 次变形）（连续性最重要）
+- [ ] **补对称缺口**：`/safe-users` 加 `responses={404: {...}}`（5 分钟；`/items` 已做对、它没做）
 
 ### W5 剩余（10/8–10/11）
-- [ ] FastAPI：把 `Depends` / `response_model` / `HTTPException` 整理成一个小 demo 项目
-- [ ] 有余力：BFS 变形（103 锯齿 / 429 N叉树）
+- [ ] ⭐ FastAPI 收官小项目：`main.py` 拆 `models.py` + `main.py`，
+      `Depends` 鉴权 + `response_model` 防泄露 + `TestClient` 写 assert
+      （**这是项目1 的地基，优先级高于多刷一题**）
+- [ ] 有余力：BFS 变形（103 锯齿 → 429 N叉树 / 994 腐烂橘子）
 - [ ] **W5 周复盘**（周日）
 
 ### 已结案

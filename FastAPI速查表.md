@@ -283,3 +283,139 @@ def get_user(user_id: int):            # FastAPI 读这个标注 → 决定参�
 | `skip: int` 去掉默认值 | 仍然是 query 参数，只是变成**必填**（不是变成 path） |
 | 中文引号 `"…"` 写进双引号字符串 | `SyntaxError` —— 用「」 |
 | `response_model` 不写 | **可能把密码哈希返回给前端**（见下节，待补） |
+
+---
+
+## 八、机制七问（2026-10-09 实测整理）
+
+> 这一节回答的是"**为什么这样**"，不是"怎么写"。全是实测输出，不是断言。
+
+### ① `models.py` 里的 Pydantic 类 —— 是"图纸/模具"
+
+| 名字 | 是什么 | 装数据吗 |
+|---|---|---|
+| `class ChatIn(BaseModel)` | **图纸**（规定请求必须长什么样） | ❌ 不装 |
+| `ChatIn(prompt="你好")` | **用图纸压出来的那一个** | ✅ 装，只活一次请求 |
+
+**三个作用：** ① 校验**进**来的请求体 ② 过滤**出**去的响应 ③ 自动生成 `/docs`
+
+### ② `@app.get` / `@app.post` —— 不是"检查"，是**登记路由**
+
+**实测：登记后 `app.routes` 里多了这些**
+```
+['GET']   /health
+['POST']  /v1/chat
+['GET']   /v1/usage
+```
+
+`@app.get('/health')` = 「把下面这个函数登记进路由表：**用 GET 访问 `/health` 时调用它**」
+（`@app.get(...)` 就是 `app.get('/health')(函数)`，把函数存进 `app.routes`）
+
+| 方法 | 语义 | 例子 |
+|---|---|---|
+| **GET** | **读**，不该改数据 | `/health`、`/v1/usage` |
+| **POST** | **提交/创建**，会改数据 | `/auth/login`、`/v1/chat` |
+
+> **为什么 login 必须 POST？** GET 的参数会出现在 URL 里 → 密码进浏览器历史/服务器日志/代理缓存。POST 放在请求体里。
+
+### ③ 冒号后的类名 —— **Python 不检查，FastAPI 才检查**
+
+```python
+def f(x: int): return x
+f('hello')   # -> 'hello'   ← 标注说 int，传字符串照样跑！不报错
+```
+
+**类型标注只是标签/元数据。是 FastAPI 主动读它（`inspect.signature`）才产生校验。**
+
+```
+请求进来 → FastAPI 读签名 → 试着用请求体构造 ChatIn
+        → 不符合图纸 → 【422】，函数体【一行都不执行】
+        → 符合       → 才调用 chat(data, ...)
+```
+
+> **422 不是崩溃，是 FastAPI 在挡你。** 所以函数体里不用写任何"字段对不对"的判断。
+
+### ④ `secrets` 怎么造 token
+
+```
+secrets.token_hex(8) → 向操作系统要 8 字节真随机数（os.urandom）→ 16 个十六进制字符
+                     → 64 位 = 2^64 ≈ 1.8×10¹⁹ 种可能
+```
+
+**实测为什么不能用 `random`：**
+```
+random.seed(1); [random.randint(0,9) for _ in range(8)] -> [2,9,1,4,1,7,7,7]
+random.seed(1); [random.randint(0,9) for _ in range(8)] -> [2,9,1,4,1,7,7,7]  ← 完全一样！
+```
+`random` 是伪随机，**种子一样结果就一样** → 能被推算 → **不能做密钥**。
+
+### ⑤ `response_model` vs `responses` —— 名字像，作用相反
+
+| | 干什么 | 会动数据吗 |
+|---|---|---|
+| **`response_model=ChatOut`** | 把 `return` 的东西**过滤+转换**成 ChatOut 的形状 | ✅ **真的删字段** |
+| **`responses={401: {...}}`** | 只是写进 `/docs` 的一句说明 | ❌ **完全不动数据** |
+
+**实测（删掉 `responses` 会怎样）：**
+```
+带 responses 的 openapi: ['200', '401']
+不带 responses 的 openapi: ['200']      -> 运行时行为完全一样
+```
+
+> 🔑 **`response_model` = 安全边界**（靠它挡住密码）／**`responses` = 给调用方看的合同说明**
+
+### ⑥ `Depends` —— 不是"检查"，是**真的调用**
+
+```
+请求进来
+  → FastAPI 解析 Header 拿到 token
+  → 【真的调用】get_current_user(token)
+        ├─ raise HTTPException(401) → 【请求在这里结束】，chat 函数不执行
+        └─ 没抛异常 → 返回 user dict
+  → 把 user dict 塞进 chat 的 user 参数
+  → 才调用 chat(data, user)
+```
+
+> 所以 `Depends` **不只是取值，还是一个关口** —— `/v1/chat` 不带 token 返回 401，
+> 就是因为依赖抛了异常，函数体压根没跑。依赖还能**嵌套**。
+
+**⚠️ 坑：`Depends(f)` 不加括号**
+```
+Depends(get_current_user)    -> dependency=<function get_current_user>   ✅
+Depends(get_current_user())  -> dependency={'username': 'zhong'}         ❌ 一个 dict
+→ TypeError: {'username': 'zhong'} is not a callable object（装饰器求值时当场炸，服务起不来）
+```
+
+### ⑦ `user['username']` 的数据从哪来（完整链路）
+
+```
+【起点】auth.py 写死的：
+   USERS = {"zhong": {"username": "zhong", "password": "123456"}}
+                                       ↑ 键名就叫 'username'
+
+   ↓ 有人登录
+【login】TOKENS[token] = data.username
+   TOKENS = {'7180804c': 'zhong'}          ← 存下 "token → 用户名"
+
+   ↓ 有人带 token 调 /v1/chat
+【get_current_user】两次换：
+   ① username = TOKENS[token]   -> 'zhong'
+   ② return USERS[username]     -> {'username': 'zhong', 'password': '123456'}
+
+   ↓ 返回值被塞进 chat 的 user 参数
+【chat】user['username'] -> 'zhong'
+```
+
+> ## 🔑 引号规则（这一条搞懂，5 次的老毛病就断根）
+> **这个键，是你"直接写出来的"，还是"从别处拿来的"？**
+>
+> | 想拿的东西 | 写什么 | 为什么 |
+> |---|---|---|
+> | dict 里那个**叫 username 的字段** | `user['username']` | 键名**写死在代码里** → **加引号** |
+> | 名字**存在变量 `name` 里** | `user[name]` | 键名在**变量**里 → 不加引号 |
+> | 用户对象 `data` 的 username 属性 | `USERS[data.username]` | 键名从**对象**取 → 不加引号 |
+>
+> ```
+> 'username'       ← 字典"出厂"就带好的固定名字，永远不变
+>  data.username   ← 要运行到这一步才知道是啥
+> ```

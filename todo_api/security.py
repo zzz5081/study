@@ -1,5 +1,9 @@
 import os,bcrypt,jwt,datetime
 
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).parent / ".env")
+
 SECRET_KEY = os.environ.get("APP_SECRET")
 if not SECRET_KEY:
     raise RuntimeError("请先设置环境变量 APP_SECRET_KEY")

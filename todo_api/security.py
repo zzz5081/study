@@ -25,6 +25,8 @@ def create_token(user_id: int, username: str, hours: int = 2) ->str:
 def decode_token(token: str) -> dict:
     return jwt.decode(token,SECRET_KEY,algorithms=['HS256'])
 
-# t = create_token(1,'张三',2)
-# print(t)
-# print(decode_token(t))
+def hash_password_str(password: str) -> str:
+    return hash_password(password).decode()
+
+def verify_password_str(password: str, hashed: str) -> bool:
+    return verify_password(password,hashed.encode())

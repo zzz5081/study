@@ -1,6 +1,7 @@
 import secrets
-def test_register_new_user(client):
+def test_register_new_user(client,cleanup):
     name = "t_" + secrets.token_hex(5)
+    cleanup.append(name)
     r = client.post("/auth/register",json={'username':name,"password":"12345678"})
     assert r.status_code == 201
 
